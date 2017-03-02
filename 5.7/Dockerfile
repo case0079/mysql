@@ -30,6 +30,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Sys::Hostname
 # Data::Dumper
 		perl \
+		python \
 	&& rm -rf /var/lib/apt/lists/*
 
 RUN set -ex; \
@@ -43,8 +44,13 @@ RUN set -ex; \
 
 ENV MYSQL_MAJOR 5.7
 ENV MYSQL_VERSION 5.7.17-1debian8
+ENV CONNECTOR-PYTHON 2.1
+ENV MYSQL-UTILITIES 1.5
 
-RUN echo "deb http://repo.mysql.com/apt/debian/ jessie mysql-${MYSQL_MAJOR}" > /etc/apt/sources.list.d/mysql.list
+RUN echo "deb http://repo.mysql.com/apt/debian/ jessie mysql-${MYSQL_MAJOR} \ " >> /etc/apt/sources.list.d/mysql.list
+RUN echo "deb http://repo.mysql.com/apt/debian/ jessie connector-python-{CONNECTOR-PYTHON}" >> /etc/apt/sources.list.d/mysql.list
+RUN echo "deb http://repo.mysql.com/apt/debian/ jessie mysql-utilities-${MYSQL-UTILITIES}" >> /etc/apt/sources.list.d/mysql.list
+
 
 # the "/var/lib/mysql" stuff here is because the mysql-server postinst doesn't have an explicit way to disable the mysql_install_db codepath besides having a database already "configured" (ie, stuff in /var/lib/mysql/mysql)
 # also, we set debconf keys to make APT a little quieter
@@ -72,4 +78,6 @@ RUN ln -s usr/local/bin/docker-entrypoint.sh /entrypoint.sh # backwards compat
 ENTRYPOINT ["docker-entrypoint.sh"]
 
 EXPOSE 3306
+EXPOSE 32274
+EXPOSE 32275
 CMD ["mysqld"]
